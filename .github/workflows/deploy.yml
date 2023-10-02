@@ -5,7 +5,7 @@ on:
     inputs:
       cmake_params:
         description: 'cmake params'
-        default: ''
+        default: 'BETTERCAMERA=1 NODRAWINGDISTANCE=1 TEXTURE_FIX=1 EXT_OPTIONS_MENU=1 EXTERNAL_DATA=1'
         required: false
         type: string
 
