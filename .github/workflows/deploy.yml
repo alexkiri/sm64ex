@@ -1,0 +1,36 @@
+name: build
+on: 
+  workflow_dispatch:
+    inputs:
+      cmake_params:
+        description: 'cmake params'
+        default: ''
+        required: false
+        type: string
+
+jobs:
+  msys2-ucrt64:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: nightly
+      - name: Setup msys2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: unzip make git python mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-glew mingw-w64-ucrt-x86_64-SDL2 mingw-w64-ucrt-x86_64-SDL
+      - name: Build with params ${{ inputs.cmake_params }}
+        run: |
+          wget -O baserom.us.z64 ${{ secrets.ROM_US_URL }}
+          make ${{ inputs.cmake_params }} -j2
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: everything
+          path: ./*
