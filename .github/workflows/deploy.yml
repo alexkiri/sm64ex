@@ -1,6 +1,5 @@
 name: build
 on:
-  push:
   workflow_dispatch:
     inputs:
       cmake_params:
@@ -41,5 +40,5 @@ jobs:
       - name: Upload
         uses: actions/upload-artifact@v3
         with:
-          name: everything
+          name: artifacts
           path: ./build/*/*.exe
