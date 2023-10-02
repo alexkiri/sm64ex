@@ -9,11 +9,19 @@ on:
         type: string
 
 jobs:
-  msys2-ucrt64:
+  msys2:
     runs-on: windows-latest
     defaults:
       run:
         shell: msys2 {0}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { sys: mingw64, env: x86_64 }
+          - { sys: mingw32, env: i686 }
+          - { sys: ucrt64,  env: ucrt-x86_64 }
+          - { sys: clang64, env: clang-x86_64 }
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -22,9 +30,8 @@ jobs:
       - name: Setup msys2
         uses: msys2/setup-msys2@v2
         with:
-          msystem: UCRT64
-          update: true
-          install: unzip make git python mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-glew mingw-w64-ucrt-x86_64-SDL2 mingw-w64-ucrt-x86_64-SDL
+          msystem: ${{matrix.sys}}
+          install: unzip make git python mingw-w64-${{matrix.env}}-gcc mingw-w64-${{matrix.env}}-glew mingw-w64-${{matrix.env}}-SDL2 mingw-w64-${{matrix.env}}-SDL
       - name: Cache rom
         uses: actions/cache@v3
         id: rom-cache
@@ -34,11 +41,13 @@ jobs:
           restore-keys: rom-cache-key
       - name: Download rom
         if: steps.rom-cache.outputs.cache-hit != 'true'
-        run: wget -O baserom.us.z64 ${{ secrets.ROM_US_URL }} -nv
-      - name: Build with params ${{ inputs.cmake_params }}
-        run: make ${{ inputs.cmake_params }} -j2
+        run: wget -O baserom.us.z64 ${ secrets.ROM_US_URL}} -nv
+      - name: Build with params ${{inputs.cmake_params}}
+        run: make ${{inputs.cmake_params}} -j2
       - name: Upload
         uses: actions/upload-artifact@v3
         with:
-          name: artifacts
-          path: ./build/*/*.exe
+          name: artifacts-${{matrix.sys}}
+          path: |
+            ./build/*/*.exe
+            ./build/*/res/*
