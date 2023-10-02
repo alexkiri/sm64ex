@@ -26,12 +26,20 @@ jobs:
           msystem: UCRT64
           update: true
           install: unzip make git python mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-glew mingw-w64-ucrt-x86_64-SDL2 mingw-w64-ucrt-x86_64-SDL
+      - name: Cache rom
+        uses: actions/cache@v3
+        id: rom-cache
+        with:
+          path: ./baserom.us.z64
+          key: rom-cache-key
+          restore-keys: rom-cache-key
+      - name: Download rom
+        if: steps.rom-cache.outputs.cache-hit != 'true'
+        run: wget -O baserom.us.z64 ${{ secrets.ROM_US_URL }} -nv
       - name: Build with params ${{ inputs.cmake_params }}
-        run: |
-          wget -O baserom.us.z64 ${{ secrets.ROM_US_URL }}
-          make ${{ inputs.cmake_params }} -j2
+        run: make ${{ inputs.cmake_params }} -j2
       - name: Upload
         uses: actions/upload-artifact@v3
         with:
           name: everything
-          path: ./*
+          path: ./build/*/*.exe
