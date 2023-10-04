@@ -3,8 +3,11 @@ on:
   workflow_dispatch:
     inputs:
       cmake_params:
-        description: 'cmake params'
         default: 'BETTERCAMERA=1 NODRAWINGDISTANCE=1 TEXTURE_FIX=1 EXT_OPTIONS_MENU=1 EXTERNAL_DATA=1'
+        required: false
+        type: string
+      enhancement_patches:
+        default: './enhancements/60fps_ex.patch'
         required: false
         type: string
 
@@ -34,6 +37,8 @@ jobs:
       - name: Download rom
         if: steps.rom-cache.outputs.cache-hit != 'true'
         run: wget -O baserom.us.z64 ${ secrets.ROM_US_URL}} -nv
+      - name: Apply enhancements ${{inputs.enhancement_patches}}
+        run: git apply ${{inputs.enhancement_patches}}
       - name: Build with params ${{inputs.cmake_params}}
         run: make ${{inputs.cmake_params}} -j2
       - name: Upload
