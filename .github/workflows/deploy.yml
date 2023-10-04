@@ -3,11 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       cmake_params:
-        default: 'BETTERCAMERA=1 NODRAWINGDISTANCE=1 TEXTURE_FIX=1 EXT_OPTIONS_MENU=1 EXTERNAL_DATA=1'
-        required: false
-        type: string
-      enhancement_patches:
-        default: './enhancements/60fps_ex.patch'
+        default: 'EXT_DEBUG_MENU=1 NODRAWINGDISTANCE=1 PORT_MOP_OBJS=1 HIGH_FPS_PC=1 EXTERNAL_DATA=1'
         required: false
         type: string
 
@@ -21,7 +17,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: nightly
+          repository: AloXado320/sm64ex-alo
       - name: Setup msys2
         uses: msys2/setup-msys2@v2
         with:
@@ -37,8 +33,6 @@ jobs:
       - name: Download rom
         if: steps.rom-cache.outputs.cache-hit != 'true'
         run: wget -O baserom.us.z64 ${ secrets.ROM_US_URL}} -nv
-      - name: Apply enhancements ${{inputs.enhancement_patches}}
-        run: git apply ${{inputs.enhancement_patches}}
       - name: Build with params ${{inputs.cmake_params}}
         run: make ${{inputs.cmake_params}} -j2
       - name: Upload
